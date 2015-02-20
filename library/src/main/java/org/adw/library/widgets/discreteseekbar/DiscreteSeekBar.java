@@ -623,6 +623,9 @@ public class DiscreteSeekBar extends View {
         int actionMasked = MotionEventCompat.getActionMasked(event);
         switch (actionMasked) {
             case MotionEvent.ACTION_DOWN:
+                if (mPublicChangeListener != null) {
+                    mPublicChangeListener.onStartTrackingTouch(this);
+                }
                 mDownX = event.getX();
                 startDragging(event, isInScrollingContainer());
                 break;
@@ -638,6 +641,9 @@ public class DiscreteSeekBar extends View {
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
+                if (mPublicChangeListener != null) {
+                    mPublicChangeListener.onStopTrackingTouch(this);
+                }
                 stopDragging();
                 break;
         }
@@ -655,10 +661,6 @@ public class DiscreteSeekBar extends View {
         bounds.inset(-mAddedTouchBounds, -mAddedTouchBounds);
         mIsDragging = (bounds.contains((int) ev.getX(), (int) ev.getY()));
         if (!mIsDragging && mAllowTrackClick && !ignoreTrackIfInScrollContainer) {
-            if (mPublicChangeListener != null) {
-                mPublicChangeListener.onStartTrackingTouch(this);
-            }
-
             //If the user clicked outside the thumb, we compute the current position
             //and force an immediate drag to it.
             mIsDragging = true;
@@ -682,9 +684,6 @@ public class DiscreteSeekBar extends View {
     }
 
     private void stopDragging() {
-        if (mPublicChangeListener != null) {
-            mPublicChangeListener.onStopTrackingTouch(this);
-        }
         mIsDragging = false;
         setPressed(false);
     }
