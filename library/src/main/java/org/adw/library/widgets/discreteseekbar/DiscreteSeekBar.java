@@ -623,9 +623,6 @@ public class DiscreteSeekBar extends View {
         int actionMasked = MotionEventCompat.getActionMasked(event);
         switch (actionMasked) {
             case MotionEvent.ACTION_DOWN:
-                if (mPublicChangeListener != null) {
-                    mPublicChangeListener.onStartTrackingTouch(this);
-                }
                 mDownX = event.getX();
                 startDragging(event, isInScrollingContainer());
                 break;
@@ -641,9 +638,6 @@ public class DiscreteSeekBar extends View {
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
-                if (mPublicChangeListener != null) {
-                    mPublicChangeListener.onStopTrackingTouch(this);
-                }
                 stopDragging();
                 break;
         }
@@ -660,10 +654,15 @@ public class DiscreteSeekBar extends View {
         //Grow the current thumb rect for a bigger touch area
         bounds.inset(-mAddedTouchBounds, -mAddedTouchBounds);
         mIsDragging = (bounds.contains((int) ev.getX(), (int) ev.getY()));
+        if (mIsDragging) {
+            onStartTrackingTouch();
+        }
         if (!mIsDragging && mAllowTrackClick && !ignoreTrackIfInScrollContainer) {
             //If the user clicked outside the thumb, we compute the current position
             //and force an immediate drag to it.
             mIsDragging = true;
+            onStartTrackingTouch();
+
             mDragOffset = (bounds.width() / 2) - mAddedTouchBounds;
             updateDragging(ev);
             //As the thumb may have moved, get the bounds again
@@ -679,11 +678,22 @@ public class DiscreteSeekBar extends View {
         return mIsDragging;
     }
 
+    private void onStartTrackingTouch() {
+        if (mPublicChangeListener != null) {
+            mPublicChangeListener.onStartTrackingTouch(this);
+        }
+    }
+
     private boolean isDragging() {
         return mIsDragging;
     }
 
     private void stopDragging() {
+        if (mIsDragging){
+            if (mPublicChangeListener != null) {
+                mPublicChangeListener.onStopTrackingTouch(this);
+            }
+        }
         mIsDragging = false;
         setPressed(false);
     }
